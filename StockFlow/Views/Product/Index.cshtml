@@ -1,0 +1,259 @@
+﻿@using ProductModel = global::StockFlow.Models.Product
+@model IEnumerable<ProductModel>
+
+@{
+    ViewData["Title"] = "Ürün Yönetimi";
+
+    var totalProducts = (int)ViewBag.TotalProducts;
+    var totalStock = (int)ViewBag.TotalStock;
+    var totalCost = (decimal)ViewBag.TotalCost;
+    var criticalStock = (int)ViewBag.CriticalStock;
+
+    var searchTerm = (string)ViewBag.SearchTerm;
+    var stockFilter = (string)ViewBag.StockFilter;
+
+    var filteredCount = Model.Count();
+}
+
+<div class="container-fluid p-0">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Ürün Yönetimi</h1>
+            <p class="page-description">
+                İşletmenizin ürün ve stok bilgilerini buradan yönetin.
+            </p>
+        </div>
+
+        <a asp-controller="Product" asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i> Yeni Ürün Ekle
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="stat-label mb-0">Toplam Ürün</span>
+                        <div class="stat-icon blue"><i class="bi bi-box-seam"></i></div>
+                    </div>
+                    <h3 class="stat-value">@totalProducts</h3>
+                    <small class="text-muted">Kayıtlı ürün sayısı</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="stat-label mb-0">Toplam Stok</span>
+                        <div class="stat-icon green"><i class="bi bi-boxes"></i></div>
+                    </div>
+                    <h3 class="stat-value">@totalStock</h3>
+                    <small class="text-muted">Depodaki toplam miktar</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="stat-label mb-0">Stok Maliyeti</span>
+                        <div class="stat-icon orange"><i class="bi bi-currency-exchange"></i></div>
+                    </div>
+                    <h3 class="stat-value" style="font-size:23px">
+                        @totalCost.ToString("N2") ₺
+                    </h3>
+                    <small class="text-muted">Mevcut stokların alış değeri</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="stat-label mb-0">Kritik Stok</span>
+                        <div class="stat-icon orange"><i class="bi bi-exclamation-triangle"></i></div>
+                    </div>
+                    <h3 class="stat-value">@criticalStock</h3>
+                    <small class="text-muted">5 veya daha az stoklu ürün</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-list-ul me-2 text-primary"></i>
+                        Ürün Listesi
+                    </h5>
+                    <small class="text-muted">Sistemde kayıtlı ürünleri yönetin.</small>
+                </div>
+
+                <span class="badge bg-light text-dark border p-2">
+                    @filteredCount Ürün Gösteriliyor
+                </span>
+            </div>
+
+            <form asp-controller="Product" asp-action="Index" method="get" class="row g-3 mb-4">
+
+                <div class="col-lg-5 col-md-12">
+                    <label class="form-label fw-semibold">Ürün Ara</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" value="@searchTerm"
+                               class="form-control"
+                               placeholder="Ürün adı veya barkod numarası..." />
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-8">
+                    <label class="form-label fw-semibold">Stok Durumu</label>
+                    <select name="stockFilter" class="form-select">
+                        <option value="all" selected="@(stockFilter == "all")">Tüm Ürünler</option>
+                        <option value="instock" selected="@(stockFilter == "instock")">Stokta Olanlar</option>
+                        <option value="low" selected="@(stockFilter == "low")">Kritik Stok (1-5)</option>
+                        <option value="out" selected="@(stockFilter == "out")">Stokta Olmayanlar</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-4 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-funnel me-1"></i> Filtrele
+                    </button>
+
+                    <a asp-controller="Product" asp-action="Index"
+                       class="btn btn-outline-secondary" title="Filtreleri temizle">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <small class="text-muted">
+                    Arama sonucu: <strong>@filteredCount</strong> ürün
+                </small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ÜRÜN BİLGİSİ</th>
+                            <th>BARKOD</th>
+                            <th>ALIŞ FİYATI</th>
+                            <th>SATIŞ FİYATI</th>
+                            <th>STOK DURUMU</th>
+                            <th>KAYIT TARİHİ</th>
+                            <th class="text-end">İŞLEMLER</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="product-name">@product.ProductName</div>
+                                        <div class="product-subtitle">Ürün No: #@product.Id</div>
+                                    </td>
+
+                                    <td>@(product.Barcode ?? "-")</td>
+                                    <td>@product.PurchasePrice.ToString("N2") ₺</td>
+                                    <td class="fw-semibold">@product.SalePrice.ToString("N2") ₺</td>
+
+                                    <td>
+                                        @if (product.StockQuantity == 0)
+                                        {
+                                            <span class="stock-badge stock-empty">
+                                                <i class="bi bi-x-circle me-1"></i> Stok Yok
+                                            </span>
+                                        }
+                                        else if (product.StockQuantity <= 5)
+                                        {
+                                            <span class="stock-badge stock-low">
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                @product.StockQuantity Adet
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="stock-badge stock-good">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                @product.StockQuantity Adet
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>@product.CreatedAt.ToString("dd.MM.yyyy")</td>
+
+                                    <td class="text-end">
+                                        <a asp-controller="Product" asp-action="Edit"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Ürünü düzenle">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <form asp-controller="Product" asp-action="Delete"
+                                              asp-route-id="@product.Id" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    title="Ürünü sil">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="bi bi-search text-muted" style="font-size:40px"></i>
+                                    <h6 class="fw-bold mt-3">Ürün bulunamadı</h6>
+                                    <p class="text-muted small">
+                                        Arama kriterlerinize uygun ürün bulunamadı.
+                                    </p>
+                                    <a asp-controller="Product" asp-action="Index"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                        Filtreleri Temizle
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
