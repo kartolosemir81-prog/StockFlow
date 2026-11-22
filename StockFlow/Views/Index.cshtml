@@ -1,0 +1,362 @@
+﻿@model StockFlow.Models.ReportsViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Raporlama";
+
+    var chartLabels = JsonSerializer.Serialize(Model.ChartLabels);
+    var entryData = JsonSerializer.Serialize(Model.EntryData);
+    var exitData = JsonSerializer.Serialize(Model.ExitData);
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Raporlama Merkezi</h2>
+            <p class="text-muted mb-0">
+                StockFlow stok ve işlem analizleri
+            </p>
+        </div>
+
+        <div>
+            <button onclick="window.print()"
+                    class="btn btn-outline-secondary">
+                <i class="bi bi-printer"></i> Yazdır
+            </button>
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @Html.ValidationSummary()
+        </div>
+    }
+
+    <!-- İstatistik Kartları -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Toplam Ürün</span>
+                        <i class="bi bi-box-seam fs-3 text-primary"></i>
+                    </div>
+                    <h2 class="fw-bold mt-3">
+                        @Model.TotalProducts
+                    </h2>
+                    <small class="text-muted">Kayıtlı ürün sayısı</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Toplam Stok</span>
+                        <i class="bi bi-layers fs-3 text-success"></i>
+                    </div>
+                    <h2 class="fw-bold mt-3">
+                        @Model.TotalStock
+                    </h2>
+                    <small class="text-muted">Depodaki toplam adet</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Stok Girişleri</span>
+                        <i class="bi bi-arrow-down-circle fs-3 text-success"></i>
+                    </div>
+                    <h2 class="fw-bold mt-3 text-success">
+                        @Model.TotalEntries
+                    </h2>
+                    <small class="text-muted">Seçilen tarih aralığı</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Stok Çıkışları</span>
+                        <i class="bi bi-arrow-up-circle fs-3 text-danger"></i>
+                    </div>
+                    <h2 class="fw-bold mt-3 text-danger">
+                        @Model.TotalExits
+                    </h2>
+                    <small class="text-muted">Seçilen tarih aralığı</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Ek Bilgiler -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <span class="text-muted">Stok Değeri</span>
+                    <h3 class="fw-bold mt-2">
+                        @Model.TotalStockValue.ToString("N2") ₺
+                    </h3>
+                    <small class="text-muted">
+                        Alış fiyatı üzerinden hesaplanmıştır.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <span class="text-muted">Stoksuz Ürün</span>
+                    <h3 class="fw-bold mt-2 text-danger">
+                        @Model.ZeroStockProducts
+                    </h3>
+                    <small class="text-muted">
+                        Stok miktarı sıfır olan ürünler.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tarih Filtresi -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-calendar-range"></i>
+                Rapor Tarih Aralığı
+            </h5>
+
+            <form asp-controller="Reports"
+                  asp-action="Index"
+                  method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Başlangıç Tarihi</label>
+                        <input type="date"
+                               name="startDate"
+                               value="@Model.StartDate.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Bitiş Tarihi</label>
+                        <input type="date"
+                               name="endDate"
+                               value="@Model.EndDate.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                            Raporu Getir
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Grafik -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-4">
+                Stok Giriş / Çıkış Analizi
+            </h5>
+
+            <div style="height:350px;">
+                <canvas id="stockChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hareket Tablosu -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between
+                        align-items-center mb-4">
+
+                <h5 class="fw-bold mb-0">
+                    Sonuçlanan Stok Hareketleri
+                </h5>
+
+                <span class="badge bg-primary">
+                    @Model.Movements.Count kayıt
+                </span>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ürün</th>
+                            <th>İşlem Türü</th>
+                            <th>Miktar</th>
+                            <th>Açıklama</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.Movements.Any())
+                        {
+                            @foreach (var item in Model.Movements)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        @(item.Product?.ProductName ?? "Silinmiş ürün")
+                                    </td>
+
+                                    <td>
+                                        @if (item.MovementType == "Giriş")
+                                        {
+                                            <span class="badge bg-success">
+                                                Giriş
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Çıkış
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="fw-bold">
+                                        @item.Quantity
+                                    </td>
+
+                                    <td>
+                                        @(item.Description ?? "-")
+                                    </td>
+
+                                    <td>
+                                        @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center text-muted py-4">
+                                    Seçilen tarih aralığında stok hareketi bulunamadı.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const labels = @Html.Raw(chartLabels);
+    const entries = @Html.Raw(entryData);
+    const exits = @Html.Raw(exitData);
+
+    const ctx = document.getElementById('stockChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+
+        data: {
+            labels: labels,
+
+            datasets: [
+                {
+                    label: 'Stok Girişi',
+                    data: entries,
+                    backgroundColor: '#16a34a',
+                    borderRadius: 6
+                },
+                {
+                    label: 'Stok Çıkışı',
+                    data: exits,
+                    backgroundColor: '#dc2626',
+                    borderRadius: 6
+                }
+            ]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    .card {
+        transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+    }
+
+    @@media print {
+        button, form {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+        }
+    }
+</style>
